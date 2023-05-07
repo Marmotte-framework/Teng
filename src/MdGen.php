@@ -27,27 +27,8 @@ declare(strict_types=1);
 
 namespace Marmotte\MdGen;
 
-use Marmotte\Brick\Bricks\BrickLoader;
-use Marmotte\Brick\Bricks\BrickManager;
-use Marmotte\Brick\Cache\CacheManager;
-use Marmotte\Brick\Mode;
-use PHPUnit\Framework\TestCase;
+use Marmotte\Brick\Brick;
 
-class LoadBrickTest extends TestCase
+final class MdGen implements Brick
 {
-    public function testBrickCanBeLoaded(): void
-    {
-        $brick_manager = new BrickManager();
-        $brick_loader = new BrickLoader(
-            $brick_manager,
-            new CacheManager(mode: Mode::TEST)
-        );
-        $brick_loader->loadFromDir(__DIR__ . '/../src');
-        $_service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
-
-        $bricks = $brick_manager->getBricks();
-        self::assertCount(1, $bricks);
-        $brick = $bricks[0];
-        self::assertSame(MdGen::class, $brick->brick->getName());
-    }
 }

@@ -1,14 +1,14 @@
 {
-    "name": "marmotte/brick-template",
-    "description": "Brick template",
+    "name": "marmotte/mdgen",
+    "description": "Markdown template engine",
     "type": "marmotte-brick",
     "keywords": [
         "marmotte",
         "template",
         "brick"
     ],
-    "homepage": "https://github.com/Marmotte-framework/Brick-template",
-    "license": "UNLICENSE",
+    "homepage": "https://github.com/Marmotte-framework/MdGen",
+    "license": "MIT",
     "authors": [
         {
             "name": "Kevin Traini",
@@ -31,7 +31,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Marmotte\\BrickName\\": "src/"
+            "Marmotte\\MdGen\\": "src/"
         },
         "exclude-from-classmap": [
             "tests/"
@@ -39,7 +39,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Marmotte\\BrickName\\": "tests/"
+            "Marmotte\\MdGen\\": "tests/"
         }
     },
     "scripts": {
