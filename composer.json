@@ -1,0 +1,49 @@
+{
+    "name": "marmotte/brick-template",
+    "description": "Brick template",
+    "type": "marmotte-brick",
+    "keywords": [
+        "marmotte",
+        "template",
+        "brick"
+    ],
+    "homepage": "https://github.com/Marmotte-framework/Brick-template",
+    "license": "UNLICENSE",
+    "authors": [
+        {
+            "name": "Kevin Traini",
+            "email": "kevin@ktraini.com"
+        }
+    ],
+    "funding": [
+        {
+            "type": "patreon",
+            "url": "https://www.patreon.com/gashmob"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "marmotte/brick": "^1.2"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^5.9",
+        "phpunit/phpunit": "^10.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marmotte\\BrickName\\": "src/"
+        },
+        "exclude-from-classmap": [
+            "tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Marmotte\\BrickName\\": "tests/"
+        }
+    },
+    "scripts": {
+        "psalm": "psalm --no-cache",
+        "test": "phpunit"
+    }
+}
