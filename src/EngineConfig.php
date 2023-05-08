@@ -48,8 +48,14 @@ final class EngineConfig extends ServiceConfig
     {
         $defaults = self::defaultArray();
 
+        if (array_key_exists('template_dir', $array) && is_string($array['template_dir'])) {
+            $template_dir = $array['template_dir'];
+        } else {
+            $template_dir = $defaults['template_dir'];
+        }
+
         return new self(
-            is_string($array['template_dir']) ? $array['template_dir'] : $defaults['template_dir']
+            $template_dir
         );
     }
 

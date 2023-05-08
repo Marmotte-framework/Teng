@@ -38,16 +38,17 @@ class LoadBrickTest extends TestCase
     public function testBrickCanBeLoaded(): void
     {
         $brick_manager = new BrickManager();
-        $brick_loader = new BrickLoader(
+        $brick_loader  = new BrickLoader(
             $brick_manager,
             new CacheManager(mode: Mode::TEST)
         );
-        $brick_loader->loadFromDir(__DIR__ . '/../src');
-        $_service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
+        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/mdgen');
+        $brick_loader->loadBricks();
+        $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
 
-        $bricks = $brick_manager->getBricks();
-        self::assertCount(1, $bricks);
-        $brick = $bricks[0];
-        self::assertSame(MdGen::class, $brick->brick->getName());
+        self::assertNotNull($brick_manager->getBrick('marmotte/mdgen'));
+        self::assertNotNull($brick_manager->getBrick('marmotte/http'));
+
+        self::assertTrue($service_manager->hasService(Engine::class));
     }
 }

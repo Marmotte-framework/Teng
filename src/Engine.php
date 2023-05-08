@@ -29,13 +29,21 @@ namespace Marmotte\MdGen;
 
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Services\Service;
+use Marmotte\Http\Stream\StreamFactory;
+use Psr\Http\Message\StreamInterface;
 
 #[Service('mdgen.yml')]
 final class Engine
 {
     public function __construct(
-        private readonly EngineConfig $config,
-        private readonly CacheManager $cache_manager,
+        private readonly EngineConfig  $_config,
+        private readonly CacheManager  $_cache_manager,
+        private readonly StreamFactory $stream_factory,
     ) {
+    }
+
+    public function render(): StreamInterface
+    {
+        return $this->stream_factory->createStream('');
     }
 }
