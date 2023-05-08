@@ -105,9 +105,9 @@ or the method of a class.
 
 ```php
 // Add an anonymous function
-$engine->addFunction(static fn() => 'Hello World!', 'nameOfFunction');
+$engine->addFunction('nameOfFunction', static fn() => 'Hello World!');
 
 // Add method of a class
 $my_class = new MyClass();
-$engine->addFunction([$my_class, 'myMethod'], 'nameOfFunction');
+$engine->addFunction('nameOfFunction', [$my_class, 'myMethod']);
 ```

@@ -25,50 +25,14 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\MdGen\Exceptions;
 
-final class Parser
+use Exception;
+
+final class FunctionExistsException extends Exception
 {
-    /**
-     * @var string[]
-     */
-    private array $lines;
-
-    /**
-     * @param array<string, callable|array{object, string}> $functions
-     */
-    public function __construct(
-        string                        $content,
-        private readonly IndentWriter $writer,
-        private readonly array        $functions,
-    ) {
-        $this->lines = explode("\n", $content);
-    }
-
-    /**
-     * @var array<string, mixed>
-     * @psalm-suppress PropertyNotSetInConstructor
-     */
-    private array $values;
-
-    /**
-     * @param array<string, mixed> $values
-     * @return string
-     */
-    public function parse(array $values): string
+    public function __construct(string $name)
     {
-        $this->values = $values;
-
-        $this->lines = $this->parseScript();
-
-        return '';
-    }
-
-    /**
-     * @return string[]
-     */
-    private function parseScript(): array
-    {
-        return [];
+        parent::__construct(sprintf('Function %s already defined', $name));
     }
 }

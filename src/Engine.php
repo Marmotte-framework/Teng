@@ -31,6 +31,7 @@ use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Services\Service;
 use Marmotte\Http\Stream\StreamException;
 use Marmotte\Http\Stream\StreamFactory;
+use Marmotte\MdGen\Exceptions\FunctionExistsException;
 use Marmotte\MdGen\Exceptions\TemplateNotFoundException;
 use Psr\Http\Message\StreamInterface;
 
@@ -38,6 +39,11 @@ use Psr\Http\Message\StreamInterface;
 final class Engine
 {
     private const CACHE_DIR = 'mdgen-templates';
+
+    /**
+     * @var array<string, callable|array{object, string}>
+     */
+    private array $functions = [];
 
     public function __construct(
         private readonly EngineConfig  $config,
@@ -68,9 +74,23 @@ final class Engine
 
         $content       = file_get_contents($filename);
         $writer        = new IndentWriter($this->stream_factory->createStream(''));
-        $parser        = new Parser($content, $writer);
+        $parser        = new Parser($content, $writer, $this->functions);
         $render_result = $parser->parse($values);
 
         return $this->stream_factory->createStream($render_result);
+    }
+
+    /**
+     * @param string                         $name
+     * @param callable|array{object, string} $function
+     * @throws FunctionExistsException
+     */
+    public function addFunction(string $name, callable|array $function): void
+    {
+        if (array_key_exists($name, $this->functions)) {
+            throw new FunctionExistsException($name);
+        }
+
+        $this->functions[$name] = $function;
     }
 }
