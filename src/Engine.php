@@ -67,7 +67,8 @@ final class Engine
         }
 
         $content       = file_get_contents($filename);
-        $parser        = new Parser($content);
+        $writer        = new IndentWriter($this->stream_factory->createStream(''));
+        $parser        = new Parser($content, $writer);
         $render_result = $parser->parse($values);
 
         return $this->stream_factory->createStream($render_result);

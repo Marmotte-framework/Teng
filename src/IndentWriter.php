@@ -27,19 +27,50 @@ declare(strict_types=1);
 
 namespace Marmotte\MdGen;
 
-final class Parser
+use Psr\Http\Message\StreamInterface;
+
+final class IndentWriter
 {
-    private readonly array $_lines;
+    private int $nb = 0;
 
     public function __construct(
-        string                        $content,
-        private readonly IndentWriter $writer,
+        private readonly StreamInterface $stream,
+        private readonly string          $indent = '    ',
     ) {
-        $this->_lines = explode("\n", $content);
     }
 
-    public function parse(array $_values): string
+    public function indent(): self
     {
-        return '';
+        $this->nb++;
+
+        return $this;
+    }
+
+    public function unindent(): self
+    {
+        $this->nb = --$this->nb < 0 ? 0 : $this->nb;
+
+        return $this;
+    }
+
+    public function write(string $text): self
+    {
+        $this->stream->write($text);
+
+        return $this;
+    }
+
+    public function writeIndent(string $text): self
+    {
+        return $this->write(
+            str_repeat($this->indent, $this->nb) . $text
+        );
+    }
+
+    public function getStream(): StreamInterface
+    {
+        $this->stream->rewind();
+
+        return $this->stream;
     }
 }
