@@ -29,21 +29,47 @@ namespace Marmotte\MdGen;
 
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Services\Service;
+use Marmotte\Http\Stream\StreamException;
 use Marmotte\Http\Stream\StreamFactory;
+use Marmotte\MdGen\Exceptions\TemplateNotFoundException;
 use Psr\Http\Message\StreamInterface;
 
 #[Service('mdgen.yml')]
 final class Engine
 {
+    private const CACHE_DIR = 'mdgen-templates';
+
     public function __construct(
-        private readonly EngineConfig  $_config,
-        private readonly CacheManager  $_cache_manager,
+        private readonly EngineConfig  $config,
+        private readonly CacheManager  $cache_manager,
         private readonly StreamFactory $stream_factory,
     ) {
     }
 
-    public function render(): StreamInterface
+    /**
+     * @param string $template Name of the template, without extension, relative to template root
+     * @param array  $values   Values of variables used in template
+     * @throws StreamException
+     * @throws TemplateNotFoundException
+     */
+    public function render(string $template, array $values = []): StreamInterface
     {
-        return $this->stream_factory->createStream('');
+        $filename = $this->config->getTemplateDir() . '/' . $template . '.mdt';
+        if (!file_exists($filename)) {
+            throw new TemplateNotFoundException($template);
+        }
+
+        if ($this->cache_manager->exists(self::CACHE_DIR, $template)) {
+            /** @var string $render_result */
+            $render_result = $this->cache_manager->load(self::CACHE_DIR, $template);
+
+            return $this->stream_factory->createStream($render_result);
+        }
+
+        $content       = file_get_contents($filename);
+        $parser        = new Parser($content);
+        $render_result = $parser->parse($values);
+
+        return $this->stream_factory->createStream($render_result);
     }
 }
