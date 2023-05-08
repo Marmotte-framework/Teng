@@ -29,17 +29,42 @@ namespace Marmotte\MdGen;
 
 final class Parser
 {
-    private readonly array $_lines;
+    /**
+     * @var string[]
+     */
+    private array $lines;
 
     public function __construct(
         string                        $content,
         private readonly IndentWriter $writer,
     ) {
-        $this->_lines = explode("\n", $content);
+        $this->lines = explode("\n", $content);
     }
 
-    public function parse(array $_values): string
+    /**
+     * @var array<string, mixed>
+     * @psalm-suppress PropertyNotSetInConstructor
+     */
+    private array $values;
+
+    /**
+     * @param array<string, mixed> $values
+     * @return string
+     */
+    public function parse(array $values): string
     {
+        $this->values = $values;
+
+        $this->lines = $this->parseScript();
+
         return '';
+    }
+
+    /**
+     * @return string[]
+     */
+    private function parseScript(): array
+    {
+        return [];
     }
 }

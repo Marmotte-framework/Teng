@@ -47,8 +47,8 @@ final class Engine
     }
 
     /**
-     * @param string $template Name of the template, without extension, relative to template root
-     * @param array  $values   Values of variables used in template
+     * @param string               $template Name of the template, without extension, relative to template root
+     * @param array<string, mixed> $values   Values of variables used in template
      * @throws StreamException
      * @throws TemplateNotFoundException
      */
