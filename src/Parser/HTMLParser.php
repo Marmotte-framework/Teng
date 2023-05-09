@@ -27,35 +27,16 @@ declare(strict_types=1);
 
 namespace Marmotte\MdGen\Parser;
 
-use Marmotte\MdGen\IndentWriter;
-
-abstract class AbstractParser
+final class HTMLParser extends AbstractParser
 {
-    /**
-     * @var string[]
-     */
-    protected array $lines;
-
-    public function __construct(
-        string                          $content,
-        protected readonly IndentWriter $writer,
-        protected readonly array        $functions,
-    ) {
-        $this->lines = explode("\n", $content);
-    }
-
-    /**
-     * @param string[] $lines
-     * @return string[]
-     */
-    protected function parseScript(array $lines): array
+    public function parse(array $values): string
     {
-        return [];
-    }
+        $this->lines = $this->parseScript($this->lines);
 
-    /**
-     * @param array<string, mixed> $values
-     * @return string
-     */
-    public abstract function parse(array $values): string;
+        foreach ($this->lines as $line) {
+            $this->writer->write($line);
+        }
+
+        return $this->writer->getStream()->getContents();
+    }
 }
