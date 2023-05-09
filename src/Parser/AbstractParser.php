@@ -25,49 +25,23 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\MdGen\Parser;
 
-final class Parser
+use Marmotte\MdGen\IndentWriter;
+
+final class AbstractParser
 {
-    /**
-     * @var string[]
-     */
-    private array $lines;
-
-    /**
-     * @param array<string, callable|array{object, string}> $functions
-     */
     public function __construct(
-        string                        $content,
-        private readonly IndentWriter $writer,
-        private readonly array        $functions,
+        protected readonly IndentWriter $writer,
+        protected readonly array        $functions,
     ) {
-        $this->lines = explode("\n", $content);
     }
 
     /**
-     * @var array<string, mixed>
-     * @psalm-suppress PropertyNotSetInConstructor
-     */
-    private array $values;
-
-    /**
-     * @param array<string, mixed> $values
-     * @return string
-     */
-    public function parse(array $values): string
-    {
-        $this->values = $values;
-
-        $this->lines = $this->parseScript();
-
-        return '';
-    }
-
-    /**
+     * @param string[] $lines
      * @return string[]
      */
-    private function parseScript(): array
+    protected function parseScript(array $lines): array
     {
         return [];
     }

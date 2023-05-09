@@ -53,14 +53,14 @@ final class Engine
     }
 
     /**
-     * @param string               $template Name of the template, without extension, relative to template root
-     * @param array<string, mixed> $values   Values of variables used in template
+     * @param string $template Name of the template, relative to template root
+     * @param array<string, mixed> $values Values of variables used in template
      * @throws StreamException
      * @throws TemplateNotFoundException
      */
     public function render(string $template, array $values = []): StreamInterface
     {
-        $filename = $this->config->getTemplateDir() . '/' . $template . '.mdt';
+        $filename = $this->config->getTemplateDir() . '/' . $template;
         if (!file_exists($filename)) {
             throw new TemplateNotFoundException($template);
         }
@@ -72,16 +72,11 @@ final class Engine
             return $this->stream_factory->createStream($render_result);
         }
 
-        $content       = file_get_contents($filename);
-        $writer        = new IndentWriter($this->stream_factory->createStream(''));
-        $parser        = new Parser($content, $writer, $this->functions);
-        $render_result = $parser->parse($values);
-
-        return $this->stream_factory->createStream($render_result);
+        return $this->stream_factory->createStream('');
     }
 
     /**
-     * @param string                         $name
+     * @param string $name
      * @param callable|array{object, string} $function
      * @throws FunctionExistsException
      */
