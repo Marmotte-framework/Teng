@@ -23,7 +23,7 @@ To place the value of a variable in your template, use this syntax: `{{ key }}`.
 For example, if you call `render` method with this array:
 
 ```php
-$engine->render('template', [
+$engine->render('template.md.mdgen', [
     'key' => 'value'
 ]);
 ```
