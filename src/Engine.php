@@ -35,6 +35,7 @@ use Marmotte\MdGen\Exceptions\FunctionExistsException;
 use Marmotte\MdGen\Exceptions\NotHandledFileTypeException;
 use Marmotte\MdGen\Exceptions\TemplateNotFoundException;
 use Marmotte\MdGen\Parser\HTMLParser;
+use Marmotte\MdGen\Parser\MarkdownParser;
 use Psr\Http\Message\StreamInterface;
 
 #[Service('mdgen.yml')]
@@ -79,7 +80,7 @@ final class Engine
         $writer = new IndentWriter($this->stream_factory->createStream(''));
         $render_result = match ($this->getFileType($filename)) {
             'html' => (new HTMLParser($content, $writer, $this->functions))->parse($values),
-            'md'   => 'md',
+            'md'   => (new MarkdownParser($content, $writer, $this->functions))->parse($values),
             null   => throw new NotHandledFileTypeException($filename)
         };
 
