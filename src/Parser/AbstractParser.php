@@ -44,6 +44,12 @@ abstract class AbstractParser
         $this->lines = explode("\n", $content);
     }
 
+    /**
+     * @param array<string, mixed> $values
+     * @return string
+     */
+    public abstract function parse(array $values): string;
+
     private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
         '/^\{\{(.*?)}}.*/';
     private const PATTERN_RULE_PCONDITION     = /** @lang PhpRegExp */
@@ -147,10 +153,4 @@ abstract class AbstractParser
 
         return $result;
     }
-
-    /**
-     * @param array<string, mixed> $values
-     * @return string
-     */
-    public abstract function parse(array $values): string;
 }
