@@ -44,6 +44,26 @@ abstract class AbstractParser
         $this->lines = explode("\n", $content);
     }
 
+    private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
+        '/^\{\{(.*?)}}.*/';
+    private const PATTERN_RULE_PCONDITION     = /** @lang PhpRegExp */
+        '/^\{#(.*?)}}.*/';
+    private const PATTERN_RULE_PCONDITION_END = /** @lang PhpRegExp */
+        '/^\{\{(.*?)#}.*/';
+    private const PATTERN_RULE_NCONDITION     = /** @lang PhpRegExp */
+        '/^\{!(.*?)}}.*/';
+    private const PATTERN_RULE_NCONDITION_END = /** @lang PhpRegExp */
+        '/^\{\{(.*?)!}.*/';
+    private const PATTERN_RULE_LOOP           = /** @lang PhpRegExp */
+        '/^\{\((.*?)}}.*/';
+    private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
+        '/^\{\{(.*?)\)}.*/';
+    private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
+        '/^\{\|(.*?)}}.*/';
+    private const TYPE_RULE_PCONDITION        = 'type-pcondition';
+    private const TYPE_RULE_NCONDITION        = 'type-ncondition';
+    private const TYPE_RULE_LOOP              = 'type-loop';
+
     /**
      * @param string[] $lines
      * @param array<string, mixed> $values
@@ -51,7 +71,81 @@ abstract class AbstractParser
      */
     protected function parseScript(array $lines, array $values): array
     {
-        return [];
+        $result = [];
+
+        /**
+         * @var array<array-key, array{
+         *     type: string,
+         *     name: string,
+         *     begin: array{
+         *         line: int,
+         *         column: int,
+         *     }
+         * }> $rule
+         */
+        $rule = [];
+        $current_rule = -1;
+        foreach ($lines as $line) {
+            $result_line = '';
+
+            $i = 0;
+            while ($i < mb_strlen($line)) {
+                if ($line[$i] === '{') {
+                    $matches = [];
+                    $str = substr($line, $i);
+                    switch (1) {
+                        case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
+                            $match = $matches[1];
+                            // parseVariable;
+                            $i += mb_strlen($match) + 4;
+                            break;
+                        case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
+                            $match = $matches[1];
+                            // parsePCondition
+                            break;
+                        case preg_match(self::PATTERN_RULE_PCONDITION_END, $str, $matches):
+                            $match = $matches[1];
+                            // parsePConditionEnd
+                            $i += mb_strlen($match) + 4;
+                            break;
+                        case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
+                            $match = $matches[1];
+                            // parseNCondition
+                            break;
+                        case preg_match(self::PATTERN_RULE_NCONDITION_END, $str, $matches):
+                            $match = $matches[1];
+                            // parseNConditionEnd
+                            $i += mb_strlen($match) + 4;
+                            break;
+                        case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
+                            $match = $matches[1];
+                            // parseLoop
+                            break;
+                        case preg_match(self::PATTERN_RULE_LOOP_END, $str, $matches):
+                            $match = $matches[1];
+                            // parseLoopEnd
+                            $i += mb_strlen($match) + 4;
+                            break;
+                        case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
+                            $match = $matches[1];
+                            // parseFunction
+                            $i += mb_strlen($match) + 4;
+                            break;
+                        default:
+                            $result_line .= $line[$i];
+                            $i++;
+                            break;
+                    }
+                } else {
+                    $result_line .= $line[$i];
+                    $i++;
+                }
+            }
+
+            $result[] = $result_line;
+        }
+
+        return $result;
     }
 
     /**
