@@ -25,30 +25,14 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen\Parser;
+namespace Marmotte\MdGen\Exceptions;
 
-use Marmotte\MdGen\IndentWriter;
+use Exception;
 
-abstract class AbstractParser
+final class NotHandledFileTypeException extends Exception
 {
-    public function __construct(
-        protected readonly IndentWriter $writer,
-        protected readonly array        $functions,
-    ) {
-    }
-
-    /**
-     * @param string[] $lines
-     * @return string[]
-     */
-    protected function parseScript(array $lines): array
+    public function __construct(string $filename)
     {
-        return [];
+        parent::__construct(sprintf('%s is not handled by MdGen', $filename));
     }
-
-    /**
-     * @param array<string, mixed> $values
-     * @return string
-     */
-    public abstract function parse(array $values): string;
 }

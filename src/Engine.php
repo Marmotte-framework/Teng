@@ -32,6 +32,7 @@ use Marmotte\Brick\Services\Service;
 use Marmotte\Http\Stream\StreamException;
 use Marmotte\Http\Stream\StreamFactory;
 use Marmotte\MdGen\Exceptions\FunctionExistsException;
+use Marmotte\MdGen\Exceptions\NotHandledFileTypeException;
 use Marmotte\MdGen\Exceptions\TemplateNotFoundException;
 use Psr\Http\Message\StreamInterface;
 
@@ -57,6 +58,7 @@ final class Engine
      * @param array<string, mixed> $values Values of variables used in template
      * @throws StreamException
      * @throws TemplateNotFoundException
+     * @throws NotHandledFileTypeException
      */
     public function render(string $template, array $values = []): StreamInterface
     {
@@ -72,7 +74,13 @@ final class Engine
             return $this->stream_factory->createStream($render_result);
         }
 
-        return $this->stream_factory->createStream('');
+        $render_result = match ($this->getFileType($filename)) {
+            'html' => 'html',
+            'md'   => 'md',
+            null   => throw new NotHandledFileTypeException($filename)
+        };
+
+        return $this->stream_factory->createStream($render_result);
     }
 
     /**
@@ -87,5 +95,17 @@ final class Engine
         }
 
         $this->functions[$name] = $function;
+    }
+
+    // _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
+
+    private function getFileType(string $filename): ?string
+    {
+        if (str_ends_with($filename, '.html.mdgen'))
+            return 'html';
+        if (str_ends_with($filename, '.md.mdgen'))
+            return 'md';
+
+        return null;
     }
 }
