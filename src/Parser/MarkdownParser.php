@@ -31,7 +31,7 @@ final class MarkdownParser extends AbstractParser
 {
     public function parse(array $values): string
     {
-        $this->lines = $this->parseScript($this->lines);
+        $this->lines = $this->parseScript($this->lines, $values);
 
         foreach ($this->lines as $line) {
             $this->writer->write($line);

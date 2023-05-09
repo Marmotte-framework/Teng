@@ -46,9 +46,10 @@ abstract class AbstractParser
 
     /**
      * @param string[] $lines
+     * @param array<string, mixed> $values
      * @return string[]
      */
-    protected function parseScript(array $lines): array
+    protected function parseScript(array $lines, array $values): array
     {
         return [];
     }
