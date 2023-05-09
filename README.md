@@ -4,9 +4,11 @@ Markdown template engine
 
 ## Templates
 
-Templates are based on [Markdown](https://wikipedia.org/wiki/Markdown) language. Files must have `.mdt` extension (it
-means markdown template). In templates, you can use classic Markdown syntax as well as HTML. But to have a good template
-engine, we need a scripting language, easy to use, not to wordy.
+MdGen can handle 2 file types: `.md.mdgen` and `.html.mdgen`. Firsts are
+classic [Markdown](https://wikipedia.org/wiki/Markdown) files, when seconds are HTML files. For both files, you can use
+a little script language (describe below) to have dynamic templates.
+
+Please note that in Markdown files, only inline HTML tags are handled. If you use others tags, you may get some errors.
 
 ### Variables
 
@@ -82,13 +84,13 @@ them on variables as filters.
 If you want to call them directly, use this syntax:
 
 ```mdt
-{> function }}
+{| function }}
 ```
 
 Or this one to pass some arguments:
 
 ```mdt
-{> function(...) }}
+{| function(...) }}
 ```
 
 In other hand, if you want to apply the function as a filter on a variable, use this syntax:
