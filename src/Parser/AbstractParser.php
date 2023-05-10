@@ -28,6 +28,8 @@ declare(strict_types=1);
 namespace Marmotte\MdGen\Parser;
 
 use Marmotte\MdGen\IndentWriter;
+use Marmotte\MdGen\Parser\Rule\AbstractRule;
+use Marmotte\MdGen\Parser\Rule\PConditionRule;
 
 abstract class AbstractParser
 {
@@ -36,7 +38,7 @@ abstract class AbstractParser
      */
     public function __construct(
         protected readonly IndentWriter $writer,
-        protected readonly array        $functions,
+        private readonly array          $functions,
     ) {
     }
 
@@ -48,9 +50,9 @@ abstract class AbstractParser
     private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
         '/^(\{\{ *(([^ ]+?)( *\| *[^ ]+?)*) *}}).*/';
     private const PATTERN_RULE_PCONDITION     = /** @lang PhpRegExp */
-        '/^\{#(.*?)}}.*/';
+        '/^(\{# *([^ ]+?) *}}).*/';
     private const PATTERN_RULE_PCONDITION_END = /** @lang PhpRegExp */
-        '/^\{\{(.*?)#}.*/';
+        '/^(\{\{ *([^ ]+?) *#}).*/';
     private const PATTERN_RULE_NCONDITION     = /** @lang PhpRegExp */
         '/^\{!(.*?)}}.*/';
     private const PATTERN_RULE_NCONDITION_END = /** @lang PhpRegExp */
@@ -72,6 +74,11 @@ abstract class AbstractParser
     {
         $result = '';
 
+        /** @var AbstractRule[] $rules */
+        $rules        = [];
+        $current_rule = -1;
+        $skip         = false;
+
         $i = 0;
         while ($i < mb_strlen($content)) {
             if ($content[$i] === '{') {
@@ -80,14 +87,28 @@ abstract class AbstractParser
                 switch (1) {
                     case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
                         $variable = $matches[2];
-                        $result   .= $this->parseVariable($variable, $values);
-                        $i        += mb_strlen($matches[1]);
+                        if (!$skip)
+                            $result .= $this->parseVariable($variable, $values);
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
-                        // parsePCondition
+                        if (!$skip) {
+                            $condition = $matches[2];
+                            $skip      = !$this->parseCondition($condition, $values);
+                            $rules[]   = new PConditionRule($condition);
+                            $current_rule++;
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_PCONDITION_END, $str, $matches):
-                        // parsePConditionEnd
+                        $condition = $matches[2];
+                        $rule      = $rules[$current_rule];
+                        if ($rule instanceof PConditionRule && $rule->key === $condition) {
+                            unset($rules[$current_rule]);
+                            $current_rule--;
+                            $skip = false;
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
                         // parseNCondition
@@ -102,18 +123,21 @@ abstract class AbstractParser
                         // parseLoopEnd
                         break;
                     case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
-                        $name   = $matches[2];
-                        $args   = $this->trimExplodeTrim($matches[4] ?? '', ',');
-                        $result .= $this->parseFunction($name, $args, $values);
-                        $i      += mb_strlen($matches[1]);
+                        $name = $matches[2];
+                        $args = $this->trimExplodeTrim($matches[4] ?? '', ',');
+                        if (!$skip)
+                            $result .= $this->parseFunction($name, $args, $values);
+                        $i += mb_strlen($matches[1]);
                         break;
                     default:
-                        $result .= $content[$i];
+                        if (!$skip)
+                            $result .= $content[$i];
                         $i++;
                         break;
                 }
             } else {
-                $result .= $content[$i];
+                if (!$skip)
+                    $result .= $content[$i];
                 $i++;
             }
         }
@@ -165,6 +189,49 @@ abstract class AbstractParser
         } catch (\Throwable) {
             return '';
         }
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function parseCondition(string $condition, array $values): bool
+    {
+        return $this->hasValue($condition, $values);
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function hasValue(string $variable, array $values): bool
+    {
+        $keys = $this->trimExplodeTrim($variable, '.');
+
+        $current = $values;
+        foreach ($keys as $key) {
+            /** @psalm-suppress MixedPropertyFetch */
+            if (isset($current->{$key})) {
+                /** @psalm-suppress MixedAssignment */
+                $current = $current->{$key};
+            } else if (isset($current[$key])) {
+                /** @psalm-suppress MixedAssignment */
+                $current = $current[$key];
+            } else {
+                $matches = [];
+                if (preg_match('/^(.*)\[(.*)]$/', $key, $matches) === 1) {
+                    $array_key = $matches[1];
+                    $n         = $matches[2];
+                    /** @psalm-suppress MixedArrayAccess */
+                    if (is_array($current[$array_key]) && isset($current[$array_key][$n])) {
+                        /** @psalm-suppress MixedAssignment */
+                        $current = $current[$array_key][$n];
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return $current !== false && $current !== null;
     }
 
     /**
