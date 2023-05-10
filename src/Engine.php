@@ -76,11 +76,11 @@ final class Engine
             return $this->stream_factory->createStream($render_result);
         }
 
-        $content = file_get_contents($filename);
-        $writer = new IndentWriter($this->stream_factory->createStream(''));
+        $content       = file_get_contents($filename);
+        $writer        = new IndentWriter($this->stream_factory->createStream(''));
         $render_result = match ($this->getFileType($filename)) {
-            'html' => (new HTMLParser($content, $writer, $this->functions))->parse($values),
-            'md'   => (new MarkdownParser($content, $writer, $this->functions))->parse($values),
+            'html' => (new HTMLParser($writer, $this->functions))->parse($content, $values),
+            'md'   => (new MarkdownParser($writer, $this->functions))->parse($content, $values),
             null   => throw new NotHandledFileTypeException($filename)
         };
 

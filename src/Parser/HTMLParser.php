@@ -29,13 +29,11 @@ namespace Marmotte\MdGen\Parser;
 
 final class HTMLParser extends AbstractParser
 {
-    public function parse(array $values): string
+    public function parse(string $content, array $values): string
     {
-        $this->lines = $this->parseScript($this->lines, $values);
+        $content = $this->parseScript($content, $values);
 
-        foreach ($this->lines as $line) {
-            $this->writer->write($line);
-        }
+        $this->writer->write($content);
 
         return $this->writer->getStream()->getContents();
     }

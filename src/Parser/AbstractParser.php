@@ -32,26 +32,18 @@ use Marmotte\MdGen\IndentWriter;
 abstract class AbstractParser
 {
     /**
-     * @var string[]
-     */
-    protected array $lines;
-
-    /**
      * @param array<string, callable|array{object, string}> $functions
      */
     public function __construct(
-        string                          $content,
         protected readonly IndentWriter $writer,
         protected readonly array        $functions,
     ) {
-        $this->lines = explode("\n", $content);
     }
 
     /**
      * @param array<string, mixed> $values
-     * @return string
      */
-    public abstract function parse(array $values): string;
+    public abstract function parse(string $content, array $values): string;
 
     private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
         '/^(\{\{ *(([^ ]+?)( *\| *[^ ]+?)*) *}}).*/';
@@ -74,64 +66,56 @@ abstract class AbstractParser
     private const TYPE_RULE_LOOP              = 'type-loop';
 
     /**
-     * @param string[] $lines
      * @param array<string, mixed> $values
-     * @return string[]
      */
-    protected function parseScript(array $lines, array $values): array
+    protected function parseScript(string $content, array $values): string
     {
-        $result = [];
+        $result = '';
 
-        foreach ($lines as $line) {
-            $result_line = '';
-
-            $i = 0;
-            while ($i < mb_strlen($line)) {
-                if ($line[$i] === '{') {
-                    $matches = [];
-                    $str     = substr($line, $i);
-                    switch (1) {
-                        case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
-                            $variable    = $matches[2];
-                            $result_line .= $this->parseVariable($variable, $values);
-                            $i           += mb_strlen($matches[1]);
-                            break;
-                        case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
-                            // parsePCondition
-                            break;
-                        case preg_match(self::PATTERN_RULE_PCONDITION_END, $str, $matches):
-                            // parsePConditionEnd
-                            break;
-                        case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
-                            // parseNCondition
-                            break;
-                        case preg_match(self::PATTERN_RULE_NCONDITION_END, $str, $matches):
-                            // parseNConditionEnd
-                            break;
-                        case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
-                            // parseLoop
-                            break;
-                        case preg_match(self::PATTERN_RULE_LOOP_END, $str, $matches):
-                            // parseLoopEnd
-                            break;
-                        case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
-                            $name        = $matches[2];
-                            $args        = $this->trimExplodeTrim($matches[4] ?? '', ',');
-                            $result_line .= $this->parseFunction($name, $args, $values);
-                            $i           += mb_strlen($matches[1]);
-                            break;
-                        default:
-                            $result_line .= $line[$i];
-                            $i++;
-                            break;
-                    }
-                } else {
-                    $result_line .= $line[$i];
-                    $i++;
+        $i = 0;
+        while ($i < mb_strlen($content)) {
+            if ($content[$i] === '{') {
+                $matches = [];
+                $str     = substr($content, $i);
+                switch (1) {
+                    case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
+                        $variable = $matches[2];
+                        $result   .= $this->parseVariable($variable, $values);
+                        $i        += mb_strlen($matches[1]);
+                        break;
+                    case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
+                        // parsePCondition
+                        break;
+                    case preg_match(self::PATTERN_RULE_PCONDITION_END, $str, $matches):
+                        // parsePConditionEnd
+                        break;
+                    case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
+                        // parseNCondition
+                        break;
+                    case preg_match(self::PATTERN_RULE_NCONDITION_END, $str, $matches):
+                        // parseNConditionEnd
+                        break;
+                    case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
+                        // parseLoop
+                        break;
+                    case preg_match(self::PATTERN_RULE_LOOP_END, $str, $matches):
+                        // parseLoopEnd
+                        break;
+                    case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
+                        $name   = $matches[2];
+                        $args   = $this->trimExplodeTrim($matches[4] ?? '', ',');
+                        $result .= $this->parseFunction($name, $args, $values);
+                        $i      += mb_strlen($matches[1]);
+                        break;
+                    default:
+                        $result .= $content[$i];
+                        $i++;
+                        break;
                 }
+            } else {
+                $result .= $content[$i];
+                $i++;
             }
-
-            $result[] = $result_line;
         }
 
         return $result;
