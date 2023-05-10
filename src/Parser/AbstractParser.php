@@ -79,18 +79,6 @@ abstract class AbstractParser
     {
         $result = [];
 
-        /**
-         * @var array<array-key, array{
-         *     type: string,
-         *     name: string,
-         *     begin: array{
-         *         line: int,
-         *         column: int,
-         *     }
-         * }> $rule
-         */
-        $rule = [];
-        $current_rule = -1;
         foreach ($lines as $line) {
             $result_line = '';
 
@@ -98,44 +86,33 @@ abstract class AbstractParser
             while ($i < mb_strlen($line)) {
                 if ($line[$i] === '{') {
                     $matches = [];
-                    $str = substr($line, $i);
+                    $str     = substr($line, $i);
                     switch (1) {
                         case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
-                            $match = $matches[1];
-                            // parseVariable;
-                            $i += mb_strlen($match) + 4;
+                            $match       = $matches[1];
+                            $result_line .= $this->parseVariable($match, $values);
+                            $i           += mb_strlen($match) + 4;
                             break;
                         case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
-                            $match = $matches[1];
                             // parsePCondition
                             break;
                         case preg_match(self::PATTERN_RULE_PCONDITION_END, $str, $matches):
-                            $match = $matches[1];
                             // parsePConditionEnd
-                            $i += mb_strlen($match) + 4;
                             break;
                         case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
-                            $match = $matches[1];
                             // parseNCondition
                             break;
                         case preg_match(self::PATTERN_RULE_NCONDITION_END, $str, $matches):
-                            $match = $matches[1];
                             // parseNConditionEnd
-                            $i += mb_strlen($match) + 4;
                             break;
                         case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
-                            $match = $matches[1];
                             // parseLoop
                             break;
                         case preg_match(self::PATTERN_RULE_LOOP_END, $str, $matches):
-                            $match = $matches[1];
                             // parseLoopEnd
-                            $i += mb_strlen($match) + 4;
                             break;
                         case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
-                            $match = $matches[1];
                             // parseFunction
-                            $i += mb_strlen($match) + 4;
                             break;
                         default:
                             $result_line .= $line[$i];
@@ -152,5 +129,33 @@ abstract class AbstractParser
         }
 
         return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function parseVariable(string $match, array $values): string
+    {
+        $keys = array_map('trim', explode('.', trim($match)));
+
+        $current = $values;
+        foreach ($keys as $key) {
+            /** @psalm-suppress MixedPropertyFetch */
+            if (isset($current->{$key})) {
+                /** @psalm-suppress MixedAssignment */
+                $current = $current->{$key};
+            } else if (isset($current[$key])) {
+                /** @psalm-suppress MixedAssignment */
+                $current = $current[$key];
+            } else {
+                return '';
+            }
+        }
+
+        if (!is_scalar($current)) {
+            return $match;
+        }
+
+        return (string) $current;
     }
 }
