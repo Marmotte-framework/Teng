@@ -36,6 +36,9 @@ abstract class AbstractParser
      */
     protected array $lines;
 
+    /**
+     * @param array<string, callable|array{object, string}> $functions
+     */
     public function __construct(
         string                          $content,
         protected readonly IndentWriter $writer,
@@ -51,7 +54,7 @@ abstract class AbstractParser
     public abstract function parse(array $values): string;
 
     private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
-        '/^\{\{(.*?)}}.*/';
+        '/^(\{\{ *(([^ ]+?)( *\| *[^ ]+?)*) *}}).*/';
     private const PATTERN_RULE_PCONDITION     = /** @lang PhpRegExp */
         '/^\{#(.*?)}}.*/';
     private const PATTERN_RULE_PCONDITION_END = /** @lang PhpRegExp */
@@ -65,7 +68,7 @@ abstract class AbstractParser
     private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
         '/^\{\{(.*?)\)}.*/';
     private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
-        '/^\{\|(.*?)}}.*/';
+        '/(^\{\| *([a-zA-Z0-9_]*?) *(\((.*?)\))? *}}).*/';
     private const TYPE_RULE_PCONDITION        = 'type-pcondition';
     private const TYPE_RULE_NCONDITION        = 'type-ncondition';
     private const TYPE_RULE_LOOP              = 'type-loop';
@@ -89,9 +92,9 @@ abstract class AbstractParser
                     $str     = substr($line, $i);
                     switch (1) {
                         case preg_match(self::PATTERN_RULE_VARIABLE, $str, $matches):
-                            $match       = $matches[1];
-                            $result_line .= $this->parseVariable($match, $values);
-                            $i           += mb_strlen($match) + 4;
+                            $variable    = $matches[2];
+                            $result_line .= $this->parseVariable($variable, $values);
+                            $i           += mb_strlen($matches[1]);
                             break;
                         case preg_match(self::PATTERN_RULE_PCONDITION, $str, $matches):
                             // parsePCondition
@@ -112,7 +115,10 @@ abstract class AbstractParser
                             // parseLoopEnd
                             break;
                         case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
-                            // parseFunction
+                            $name        = $matches[2];
+                            $args        = $this->trimExplodeTrim($matches[4] ?? '', ',');
+                            $result_line .= $this->parseFunction($name, $args, $values);
+                            $i           += mb_strlen($matches[1]);
                             break;
                         default:
                             $result_line .= $line[$i];
@@ -134,9 +140,55 @@ abstract class AbstractParser
     /**
      * @param array<string, mixed> $values
      */
-    private function parseVariable(string $match, array $values): string
+    private function parseVariable(string $variable, array $values): string
     {
-        $keys = array_map('trim', explode('.', trim($match)));
+        $components = $this->trimExplodeTrim($variable, '|');
+
+        if (empty($components)) {
+            return '';
+        }
+
+        $value = $this->getValue(array_shift($components), $values);
+
+        foreach ($components as $component) {
+            $value = $this->parseFunction($component, [$value], $values);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function parseFunction(string $name, array $args, array $values): string
+    {
+        $function_name = trim($name);
+        if (!array_key_exists($function_name, $this->functions)) {
+            return '';
+        }
+
+        $fun       = $this->functions[$function_name];
+        $arguments = array_map(
+            fn(string $arg) => $this->getValue($arg, $values),
+            $args
+        );
+        try {
+            if (is_callable($fun)) {
+                return (string) $fun(...$arguments);
+            } else {
+                return (string) $fun[0]->{$fun[1]}(...$arguments);
+            }
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function getValue(string $variable, array $values): string
+    {
+        $keys = $this->trimExplodeTrim($variable, '.');
 
         $current = $values;
         foreach ($keys as $key) {
@@ -148,14 +200,34 @@ abstract class AbstractParser
                 /** @psalm-suppress MixedAssignment */
                 $current = $current[$key];
             } else {
-                return '';
+                $matches = [];
+                if (preg_match('/^(.*)\[(.*)]$/', $key, $matches) === 1) {
+                    $array_key = $matches[1];
+                    $n         = $matches[2];
+                    /** @psalm-suppress MixedArrayAccess */
+                    if (is_array($current[$array_key]) && isset($current[$array_key][$n])) {
+                        /** @psalm-suppress MixedAssignment */
+                        $current = $current[$array_key][$n];
+                    }
+                } else {
+                    return $variable;
+                }
             }
         }
 
         if (!is_scalar($current)) {
-            return $match;
+            return $variable;
         }
 
         return (string) $current;
+    }
+
+    /**
+     * @param non-empty-string $separator
+     * @return string[]
+     */
+    private function trimExplodeTrim(string $str, string $separator): array
+    {
+        return array_map('trim', explode($separator, trim($str)));
     }
 }
