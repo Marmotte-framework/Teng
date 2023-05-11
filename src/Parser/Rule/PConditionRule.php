@@ -25,7 +25,7 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen\Parser\Rule;
+namespace Marmotte\Teng\Parser\Rule;
 
 final class PConditionRule extends ConditionRule
 {

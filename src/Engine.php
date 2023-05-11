@@ -25,17 +25,17 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\Teng;
 
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Services\Service;
 use Marmotte\Http\Stream\StreamException;
 use Marmotte\Http\Stream\StreamFactory;
-use Marmotte\MdGen\Exceptions\FunctionExistsException;
-use Marmotte\MdGen\Exceptions\NotHandledFileTypeException;
-use Marmotte\MdGen\Exceptions\TemplateNotFoundException;
-use Marmotte\MdGen\Parser\HTMLParser;
-use Marmotte\MdGen\Parser\MarkdownParser;
+use Marmotte\Teng\Exceptions\FunctionExistsException;
+use Marmotte\Teng\Exceptions\NotHandledFileTypeException;
+use Marmotte\Teng\Exceptions\TemplateNotFoundException;
+use Marmotte\Teng\Parser\HTMLParser;
+use Marmotte\Teng\Parser\MarkdownParser;
 use Psr\Http\Message\StreamInterface;
 
 #[Service('mdgen.yml')]

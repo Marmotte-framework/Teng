@@ -25,10 +25,10 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\Teng;
 
 use Marmotte\Brick\Brick;
 
-final class MdGen implements Brick
+final class Teng implements Brick
 {
 }

@@ -25,7 +25,7 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\Teng;
 
 use Marmotte\Brick\Bricks\BrickLoader;
 use Marmotte\Brick\Bricks\BrickManager;
@@ -42,11 +42,11 @@ class LoadBrickTest extends TestCase
             $brick_manager,
             new CacheManager(mode: Mode::TEST)
         );
-        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/mdgen');
+        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/teng');
         $brick_loader->loadBricks();
         $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
 
-        self::assertNotNull($brick_manager->getBrick('marmotte/mdgen'));
+        self::assertNotNull($brick_manager->getBrick('marmotte/teng'));
         self::assertNotNull($brick_manager->getBrick('marmotte/http'));
 
         self::assertTrue($service_manager->hasService(Engine::class));

@@ -25,11 +25,11 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen\Parser;
+namespace Marmotte\Teng\Parser;
 
-use Marmotte\MdGen\IndentWriter;
-use Marmotte\MdGen\Parser\Rule\AbstractRule;
-use Marmotte\MdGen\Parser\Rule\PConditionRule;
+use Marmotte\Teng\IndentWriter;
+use Marmotte\Teng\Parser\Rule\AbstractRule;
+use Marmotte\Teng\Parser\Rule\PConditionRule;
 
 abstract class AbstractParser
 {

@@ -1,10 +1,10 @@
-# MdGen
+# Teng
 
-Markdown template engine
+Template engine
 
 ## Templates
 
-MdGen can handle 2 file types: `.md.mdgen` and `.html.mdgen`. Firsts are
+Teng can handle 2 file types: `.md.teng` and `.html.teng`. Firsts are
 classic [Markdown](https://wikipedia.org/wiki/Markdown) files, when seconds are HTML files. For both files, you can use
 a little script language (describe below) to have dynamic templates.
 
@@ -23,7 +23,7 @@ To place the value of a variable in your template, use this syntax: `{{ key }}`.
 For example, if you call `render` method with this array:
 
 ```php
-$engine->render('template.md.mdgen', [
+$engine->render('template.md.teng', [
     'key' => 'value'
 ]);
 ```

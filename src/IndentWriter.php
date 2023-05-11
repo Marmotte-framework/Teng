@@ -25,7 +25,7 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen;
+namespace Marmotte\Teng;
 
 use Psr\Http\Message\StreamInterface;
 

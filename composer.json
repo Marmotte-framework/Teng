@@ -1,13 +1,13 @@
 {
-    "name": "marmotte/mdgen",
-    "description": "Markdown template engine",
+    "name": "marmotte/teng",
+    "description": "Template engine",
     "type": "marmotte-brick",
     "keywords": [
         "marmotte",
         "template",
         "brick"
     ],
-    "homepage": "https://github.com/Marmotte-framework/MdGen",
+    "homepage": "https://github.com/Marmotte-framework/Teng",
     "license": "MIT",
     "authors": [
         {
@@ -32,7 +32,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Marmotte\\MdGen\\": "src/"
+            "Marmotte\\Teng\\": "src/"
         },
         "exclude-from-classmap": [
             "tests/"
@@ -40,7 +40,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Marmotte\\MdGen\\": "tests/"
+            "Marmotte\\Teng\\": "tests/"
         }
     },
     "scripts": {

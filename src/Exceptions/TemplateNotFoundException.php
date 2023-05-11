@@ -25,7 +25,7 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\MdGen\Exceptions;
+namespace Marmotte\Teng\Exceptions;
 
 use Exception;
 
