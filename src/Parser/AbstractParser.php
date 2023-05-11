@@ -29,6 +29,7 @@ namespace Marmotte\Teng\Parser;
 
 use Marmotte\Teng\IndentWriter;
 use Marmotte\Teng\Parser\Rule\AbstractRule;
+use Marmotte\Teng\Parser\Rule\LoopRule;
 use Marmotte\Teng\Parser\Rule\NConditionRule;
 use Marmotte\Teng\Parser\Rule\PConditionRule;
 
@@ -59,9 +60,9 @@ abstract class AbstractParser
     private const PATTERN_RULE_NCONDITION_END = /** @lang PhpRegExp */
         '/^(\{\{ *([^ ]+?) *!}).*/';
     private const PATTERN_RULE_LOOP           = /** @lang PhpRegExp */
-        '/^\{\((.*?)}}.*/';
+        '/^(\{\( *([^ ]+?) *}}).*/';
     private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
-        '/^\{\{(.*?)\)}.*/';
+        '/^(\{\{ *([^ ]+?) *\)}).*/';
     private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
         '/(^\{\| *([a-zA-Z0-9_]*?) *(\((.*?)\))? *}}).*/';
     private const TYPE_RULE_PCONDITION        = 'type-pcondition';
@@ -131,10 +132,45 @@ abstract class AbstractParser
                         $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
-                        // parseLoop
+                        if (!$skip) {
+                            $loop = $matches[2];
+                            $rule = $this->parseLoop($loop, $values, $i + mb_strlen($matches[1]));
+                            if ($rule === false) {
+                                $i += mb_strlen($matches[1]);
+                                break;
+                            }
+                            $rules[] = $rule;
+                            $current_rule++;
+                            $temp_values = $this->iterateLoop($rule, $values);
+                            if ($temp_values === false) {
+                                $skip = true;
+                            } else {
+                                $values = $temp_values;
+                            }
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_LOOP_END, $str, $matches):
-                        // parseLoopEnd
+                        $loop = $matches[2];
+                        $rule = $rules[$current_rule];
+                        if ($rule instanceof LoopRule && $rule->key === $loop) {
+                            if ($skip || $rule->end()) {
+                                unset($rules[$current_rule]);
+                                $current_rule--;
+                                $skip = false;
+                                $i    += mb_strlen($matches[1]);
+                                break;
+                            }
+                            $temp_values = $this->iterateLoop($rule, $values);
+                            if ($temp_values !== false) {
+                                $values = $temp_values;
+                                $i      = $rule->begin;
+                                break;
+                            }
+                            unset($rules[$current_rule]);
+                            $current_rule--;
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_FUNCTION, $str, $matches):
                         $name = $matches[2];
@@ -171,6 +207,9 @@ abstract class AbstractParser
         }
 
         $value = $this->getValue(array_shift($components), $values);
+        if (!is_string($value)) {
+            return $variable;
+        }
 
         foreach ($components as $component) {
             $value = $this->parseFunction($component, [$value], $values);
@@ -216,6 +255,70 @@ abstract class AbstractParser
     /**
      * @param array<string, mixed> $values
      */
+    private function parseLoop(string $loop, array $values, int $begin): LoopRule|false
+    {
+        $components = $this->trimExplodeTrim($loop, ':');
+        if (count($components) !== 2) {
+            return false;
+        }
+
+        $key = $components[0];
+        if (!$this->hasValue($key, $values)) {
+            return false;
+        }
+        $key_values = $this->getValue($key, $values, true);
+        if (!is_array($key_values)) {
+            return false;
+        }
+        $formatted_values = array_map(
+            static fn($key, $value) => [
+                'key'   => $key,
+                'value' => $value,
+            ],
+            array_keys($key_values),
+            array_values($key_values)
+        );
+
+        $key_value = $this->trimExplodeTrim($components[1], '->');
+        if (count($key_value) === 1) {
+            $key_name   = null;
+            $value_name = $key_value[0];
+        } else if (count($key_value) === 2) {
+            $key_name   = $key_value[0];
+            $value_name = $key_value[1];
+        } else {
+            return false;
+        }
+
+        return new LoopRule(
+            $key,
+            $key_name,
+            $value_name,
+            $formatted_values,
+            0,
+            count($formatted_values),
+            $begin
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>|false
+     */
+    public function iterateLoop(LoopRule $rule, array $values): array|false
+    {
+        $res = $rule->getNext();
+
+        if ($res === false) {
+            return false;
+        }
+
+        return array_merge($values, $res);
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
     private function hasValue(string $variable, array $values): bool
     {
         $keys = $this->trimExplodeTrim($variable, '.');
@@ -251,7 +354,7 @@ abstract class AbstractParser
     /**
      * @param array<string, mixed> $values
      */
-    private function getValue(string $variable, array $values): string
+    private function getValue(string $variable, array $values, bool $array = false): string|array
     {
         $keys = $this->trimExplodeTrim($variable, '.');
 
@@ -278,6 +381,10 @@ abstract class AbstractParser
                     return $variable;
                 }
             }
+        }
+
+        if ($array && is_array($current)) {
+            return $current;
         }
 
         if (!is_scalar($current)) {
