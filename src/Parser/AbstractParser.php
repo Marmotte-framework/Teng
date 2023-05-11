@@ -29,6 +29,7 @@ namespace Marmotte\Teng\Parser;
 
 use Marmotte\Teng\IndentWriter;
 use Marmotte\Teng\Parser\Rule\AbstractRule;
+use Marmotte\Teng\Parser\Rule\NConditionRule;
 use Marmotte\Teng\Parser\Rule\PConditionRule;
 
 abstract class AbstractParser
@@ -54,9 +55,9 @@ abstract class AbstractParser
     private const PATTERN_RULE_PCONDITION_END = /** @lang PhpRegExp */
         '/^(\{\{ *([^ ]+?) *#}).*/';
     private const PATTERN_RULE_NCONDITION     = /** @lang PhpRegExp */
-        '/^\{!(.*?)}}.*/';
+        '/^(\{! *([^ ]+?) *}}).*/';
     private const PATTERN_RULE_NCONDITION_END = /** @lang PhpRegExp */
-        '/^\{\{(.*?)!}.*/';
+        '/^(\{\{ *([^ ]+?) *!}).*/';
     private const PATTERN_RULE_LOOP           = /** @lang PhpRegExp */
         '/^\{\((.*?)}}.*/';
     private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
@@ -111,10 +112,23 @@ abstract class AbstractParser
                         $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_NCONDITION, $str, $matches):
-                        // parseNCondition
+                        if (!$skip) {
+                            $condition = $matches[2];
+                            $skip      = $this->parseCondition($condition, $values);
+                            $rules[]   = new NConditionRule($condition);
+                            $current_rule++;
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_NCONDITION_END, $str, $matches):
-                        // parseNConditionEnd
+                        $condition = $matches[2];
+                        $rule      = $rules[$current_rule];
+                        if ($rule instanceof NConditionRule && $rule->key === $condition) {
+                            unset($rules[$current_rule]);
+                            $current_rule--;
+                            $skip = false;
+                        }
+                        $i += mb_strlen($matches[1]);
                         break;
                     case preg_match(self::PATTERN_RULE_LOOP, $str, $matches):
                         // parseLoop
