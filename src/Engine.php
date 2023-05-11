@@ -34,8 +34,8 @@ use Marmotte\Http\Stream\StreamFactory;
 use Marmotte\Teng\Exceptions\FunctionExistsException;
 use Marmotte\Teng\Exceptions\NotHandledFileTypeException;
 use Marmotte\Teng\Exceptions\TemplateNotFoundException;
-use Marmotte\Teng\Parser\HTMLParser;
-use Marmotte\Teng\Parser\MarkdownParser;
+use Marmotte\Teng\Parsers\HTMLParser;
+use Marmotte\Teng\Parsers\MarkdownParser;
 use Psr\Http\Message\StreamInterface;
 
 #[Service('mdgen.yml')]

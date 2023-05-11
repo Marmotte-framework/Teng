@@ -25,12 +25,8 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng\Parser\Rule;
+namespace Marmotte\Teng\Parsers\Rules;
 
-class ConditionRule extends AbstractRule
+final class NConditionRule extends ConditionRule
 {
-    public function __construct(
-        public readonly string $key,
-    ) {
-    }
 }

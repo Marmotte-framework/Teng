@@ -25,8 +25,16 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng\Parser\Rule;
+namespace Marmotte\Teng\Parsers;
 
-final class NConditionRule extends ConditionRule
+final class HTMLParser extends AbstractParser
 {
+    public function parse(string $content, array $values): string
+    {
+        $content = $this->parseScript($content, $values);
+
+        $this->writer->write($content);
+
+        return $this->writer->getStream()->getContents();
+    }
 }

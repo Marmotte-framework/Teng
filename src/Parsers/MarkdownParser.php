@@ -25,48 +25,16 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng\Parser\Rule;
+namespace Marmotte\Teng\Parsers;
 
-final class LoopRule extends AbstractRule
+final class MarkdownParser extends AbstractParser
 {
-    /**
-     * @param array{
-     *     key: mixed,
-     *     value: mixed
-     * }[] $values
-     */
-    public function __construct(
-        public readonly string  $key,
-        public readonly ?string $key_name,
-        public readonly string  $value_name,
-        public readonly array   $values,
-        public int              $n,
-        public int              $size,
-        public readonly int     $begin,
-    ) {
-    }
-
-    public function end(): bool
+    public function parse(string $content, array $values): string
     {
-        return $this->n === $this->size;
-    }
+        $content = $this->parseScript($content, $values);
 
-    /**
-     * @return array<string, mixed>|false
-     */
-    public function getNext(): array|false
-    {
-        if ($this->end()) {
-            return false;
-        }
+        $this->writer->write($content);
 
-        $res = [$this->value_name => $this->values[$this->n]['value']];
-        if ($this->key_name !== null) {
-            /** @psalm-suppress MixedAssignment */
-            $res[$this->key_name] = $this->values[$this->n]['key'];
-        }
-        $this->n++;
-
-        return $res;
+        return $this->writer->getStream()->getContents();
     }
 }

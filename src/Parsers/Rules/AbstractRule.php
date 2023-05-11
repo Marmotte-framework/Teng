@@ -25,7 +25,7 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng\Parser\Rule;
+namespace Marmotte\Teng\Parsers\Rules;
 
 abstract class AbstractRule
 {

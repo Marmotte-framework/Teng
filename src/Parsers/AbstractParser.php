@@ -25,13 +25,13 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng\Parser;
+namespace Marmotte\Teng\Parsers;
 
 use Marmotte\Teng\IndentWriter;
-use Marmotte\Teng\Parser\Rule\AbstractRule;
-use Marmotte\Teng\Parser\Rule\LoopRule;
-use Marmotte\Teng\Parser\Rule\NConditionRule;
-use Marmotte\Teng\Parser\Rule\PConditionRule;
+use Marmotte\Teng\Parsers\Rules\AbstractRule;
+use Marmotte\Teng\Parsers\Rules\LoopRule;
+use Marmotte\Teng\Parsers\Rules\NConditionRule;
+use Marmotte\Teng\Parsers\Rules\PConditionRule;
 
 abstract class AbstractParser
 {
