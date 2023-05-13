@@ -32,6 +32,7 @@ use Marmotte\Brick\Bricks\BrickManager;
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Mode;
 use PHPUnit\Framework\TestCase;
+use function Psl\Json\decode as psl_json_decode;
 
 class EngineTest extends TestCase
 {
@@ -40,7 +41,7 @@ class EngineTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $brick_manager = new BrickManager();
-        $brick_loader = new BrickLoader(
+        $brick_loader  = new BrickLoader(
             $brick_manager,
             new CacheManager(mode: Mode::TEST)
         );
@@ -61,12 +62,13 @@ class EngineTest extends TestCase
     }
 
     /**
+     * @param array<string, mixed> $values
      * @dataProvider dataTestRender
      */
-    public function testRender(string $filename, string $expect): void
+    public function testRender(string $filename, string $expect, array $values): void
     {
         try {
-            $result = self::$engine->render($filename);
+            $result = self::$engine->render($filename, $values);
         } catch (\Throwable $e) {
             self::fail($e->getMessage());
         }
@@ -80,9 +82,12 @@ class EngineTest extends TestCase
                      scandir(__DIR__ . '/Fixtures/tests'),
                      static fn(string $file) => $file !== '.' && $file !== '..'
                  ) as $test) {
+            $values = __DIR__ . '/Fixtures/values/' . $test . '.values';
+
             yield $test => [
                 'filename' => 'tests/' . $test,
-                'expect' => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
+                'expect'   => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
+                'values'   => file_exists($values) ? psl_json_decode(file_get_contents($values)) : [],
             ];
         }
     }

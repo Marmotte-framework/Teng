@@ -31,6 +31,7 @@ use Marmotte\Brick\Bricks\BrickManager;
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Mode;
 use Marmotte\Teng\Engine;
+use function Psl\Json\decode as psl_json_decode;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
@@ -67,9 +68,12 @@ $tests = array_filter(
 $generated = [];
 foreach ($tests as $test) {
     $expect = __DIR__ . '/expects/' . $test . '.expect';
+    $values = __DIR__ . '/values/' . $test . '.values';
     if (!file_exists($expect)) {
         try {
-            $result = $engine->render($test);
+            /** @var array<string, mixed> */
+            $values = file_exists($values) ? psl_json_decode(file_get_contents($values)) : [];
+            $result = $engine->render($test, $values);
             file_put_contents($expect, (string) $result);
             $generated[] = $expect;
         } catch (Throwable) {
