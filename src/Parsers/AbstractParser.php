@@ -60,7 +60,7 @@ abstract class AbstractParser
     private const PATTERN_RULE_NCONDITION_END = /** @lang PhpRegExp */
         '/^(\{\{ *([^ ]+?) *!}).*/';
     private const PATTERN_RULE_LOOP           = /** @lang PhpRegExp */
-        '/^(\{\( *([^ ]+?) *}}).*/';
+        '/^(\{\( *([^ ].*?[^ ]) *}}).*/';
     private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
         '/^(\{\{ *([^ ]+?) *\)}).*/';
     private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
