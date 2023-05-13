@@ -57,6 +57,9 @@ if (!$service_manager->hasService(Engine::class)) {
 
 $engine = $service_manager->getService(Engine::class);
 assert($engine !== null);
+$engine->addFunction('strong', static fn(string $str) => "<strong>$str</strong>");
+$engine->addFunction('get42', static fn() => 42);
+$engine->addFunction('concatenate', static fn(string $str1, string $str2) => $str1 . $str2);
 
 $tests = array_filter(
     scandir(__DIR__ . '/tests'),

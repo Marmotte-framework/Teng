@@ -32,6 +32,7 @@ use Marmotte\Brick\Bricks\BrickManager;
 use Marmotte\Brick\Cache\CacheManager;
 use Marmotte\Brick\Mode;
 use PHPUnit\Framework\TestCase;
+use function Marmotte\Teng\Fixtures\getFunctions;
 use function Psl\Json\decode as psl_json_decode;
 
 class EngineTest extends TestCase
@@ -41,7 +42,7 @@ class EngineTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $brick_manager = new BrickManager();
-        $brick_loader  = new BrickLoader(
+        $brick_loader = new BrickLoader(
             $brick_manager,
             new CacheManager(mode: Mode::TEST)
         );
@@ -59,6 +60,9 @@ class EngineTest extends TestCase
         self::assertTrue($service_manager->hasService(Engine::class));
 
         self::$engine = $service_manager->getService(Engine::class);
+        self::$engine->addFunction('strong', static fn(string $str) => "<strong>$str</strong>");
+        self::$engine->addFunction('get42', static fn() => 42);
+        self::$engine->addFunction('concatenate', static fn(string $str1, string $str2) => $str1 . $str2);
     }
 
     /**
@@ -86,8 +90,8 @@ class EngineTest extends TestCase
 
             yield $test => [
                 'filename' => 'tests/' . $test,
-                'expect'   => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
-                'values'   => file_exists($values) ? psl_json_decode(file_get_contents($values)) : [],
+                'expect' => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
+                'values' => file_exists($values) ? psl_json_decode(file_get_contents($values)) : [],
             ];
         }
     }
