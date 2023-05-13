@@ -60,6 +60,8 @@ class EngineTest extends TestCase
         self::assertTrue($service_manager->hasService(Engine::class));
 
         self::$engine = $service_manager->getService(Engine::class);
+        self::assertNotNull(self::$engine);
+        assert(self::$engine !== null); // Mystery: self::assertNotNull is not enough for psalm
         self::$engine->addFunction('strong', static fn(string $str) => "<strong>$str</strong>");
         self::$engine->addFunction('get42', static fn() => 42);
         self::$engine->addFunction('concatenate', static fn(string $str1, string $str2) => $str1 . $str2);
