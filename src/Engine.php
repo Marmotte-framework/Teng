@@ -66,7 +66,7 @@ final class Engine
     {
         $filename = $this->config->getTemplateDir() . '/' . $template;
         if (!file_exists($filename)) {
-            throw new TemplateNotFoundException($template);
+            throw new TemplateNotFoundException($filename);
         }
 
         if ($this->cache_manager->exists(self::CACHE_DIR, $template)) {
@@ -105,9 +105,9 @@ final class Engine
 
     private function getFileType(string $filename): ?string
     {
-        if (str_ends_with($filename, '.html.mdgen'))
+        if (str_ends_with($filename, '.html.teng'))
             return 'html';
-        if (str_ends_with($filename, '.md.mdgen'))
+        if (str_ends_with($filename, '.md.teng'))
             return 'md';
 
         return null;
