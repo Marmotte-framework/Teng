@@ -27,28 +27,50 @@ declare(strict_types=1);
 
 namespace Marmotte\Teng;
 
-use Marmotte\Brick\Bricks\BrickLoader;
-use Marmotte\Brick\Bricks\BrickManager;
-use Marmotte\Brick\Cache\CacheManager;
-use Marmotte\Brick\Mode;
-use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
 
-class LoadBrickTest extends TestCase
+final class IndentWriter
 {
-    public function testBrickCanBeLoaded(): void
+    private int $nb = 0;
+
+    public function __construct(
+        private readonly StreamInterface $stream,
+        private readonly string          $indent = '    ',
+    ) {
+    }
+
+    public function indent(): self
     {
-        $brick_manager = new BrickManager();
-        $brick_loader  = new BrickLoader(
-            $brick_manager,
-            new CacheManager(mode: Mode::TEST)
+        $this->nb++;
+
+        return $this;
+    }
+
+    public function unindent(): self
+    {
+        $this->nb = --$this->nb < 0 ? 0 : $this->nb;
+
+        return $this;
+    }
+
+    public function write(string $text): self
+    {
+        $this->stream->write($text);
+
+        return $this;
+    }
+
+    public function writeIndent(string $text): self
+    {
+        return $this->write(
+            str_repeat($this->indent, $this->nb) . $text
         );
-        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/teng');
-        $brick_loader->loadBricks();
-        $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
+    }
 
-        self::assertNotNull($brick_manager->getBrick('marmotte/teng'));
-        self::assertNotNull($brick_manager->getBrick('marmotte/http'));
+    public function getStream(): StreamInterface
+    {
+        $this->stream->rewind();
 
-        self::assertTrue($service_manager->hasService(Engine::class));
+        return $this->stream;
     }
 }

@@ -25,30 +25,22 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng;
+namespace Marmotte\Teng\Parsers;
 
-use Marmotte\Brick\Bricks\BrickLoader;
-use Marmotte\Brick\Bricks\BrickManager;
-use Marmotte\Brick\Cache\CacheManager;
-use Marmotte\Brick\Mode;
-use PHPUnit\Framework\TestCase;
+use Parsedown;
 
-class LoadBrickTest extends TestCase
+final class MarkdownParser extends AbstractParser
 {
-    public function testBrickCanBeLoaded(): void
+    public function parse(string $content, array $values): string
     {
-        $brick_manager = new BrickManager();
-        $brick_loader  = new BrickLoader(
-            $brick_manager,
-            new CacheManager(mode: Mode::TEST)
-        );
-        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/teng');
-        $brick_loader->loadBricks();
-        $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
+        $result = $this->parseScript($content, $values);
 
-        self::assertNotNull($brick_manager->getBrick('marmotte/teng'));
-        self::assertNotNull($brick_manager->getBrick('marmotte/http'));
+        $parsedown = new Parsedown();
+        /** @var string $result */
+        $result = $parsedown->text($result);
 
-        self::assertTrue($service_manager->hasService(Engine::class));
+        $this->writer->write($result);
+
+        return $this->writer->getStream()->getContents();
     }
 }

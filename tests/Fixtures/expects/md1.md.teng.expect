@@ -1,0 +1,29 @@
+<h1>Markdown test</h1>
+<p>This test aims to check Markdown parser</p>
+<h2>Second heading</h2>
+<ul>
+<li>item 1</li>
+<li>item 2</li>
+<li>item 3</li>
+</ul>
+<ol>
+<li>first item</li>
+<li>second item</li>
+<li>third item</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Title 1</th>
+<th style="text-align: center;">Title 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">value 1</td>
+<td style="text-align: center;">value 2</td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://example.com">link 1</a></p>
+<p><img src="example.png" alt="image 1" /></p>

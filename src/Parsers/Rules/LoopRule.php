@@ -25,30 +25,48 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng;
+namespace Marmotte\Teng\Parsers\Rules;
 
-use Marmotte\Brick\Bricks\BrickLoader;
-use Marmotte\Brick\Bricks\BrickManager;
-use Marmotte\Brick\Cache\CacheManager;
-use Marmotte\Brick\Mode;
-use PHPUnit\Framework\TestCase;
-
-class LoadBrickTest extends TestCase
+final class LoopRule extends AbstractRule
 {
-    public function testBrickCanBeLoaded(): void
+    /**
+     * @param array{
+     *     key: mixed,
+     *     value: mixed
+     * }[] $values
+     */
+    public function __construct(
+        public readonly string  $key,
+        public readonly ?string $key_name,
+        public readonly string  $value_name,
+        public readonly array   $values,
+        public int              $n,
+        public int              $size,
+        public readonly int     $begin,
+    ) {
+    }
+
+    public function end(): bool
     {
-        $brick_manager = new BrickManager();
-        $brick_loader  = new BrickLoader(
-            $brick_manager,
-            new CacheManager(mode: Mode::TEST)
-        );
-        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/teng');
-        $brick_loader->loadBricks();
-        $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
+        return $this->n === $this->size;
+    }
 
-        self::assertNotNull($brick_manager->getBrick('marmotte/teng'));
-        self::assertNotNull($brick_manager->getBrick('marmotte/http'));
+    /**
+     * @return array<string, mixed>|false
+     */
+    public function getNext(): array|false
+    {
+        if ($this->end()) {
+            return false;
+        }
 
-        self::assertTrue($service_manager->hasService(Engine::class));
+        $res = [$this->value_name => $this->values[$this->n]['value']];
+        if ($this->key_name !== null) {
+            /** @psalm-suppress MixedAssignment */
+            $res[$this->key_name] = $this->values[$this->n]['key'];
+        }
+        $this->n++;
+
+        return $res;
     }
 }

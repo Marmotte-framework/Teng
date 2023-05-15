@@ -25,30 +25,14 @@
 
 declare(strict_types=1);
 
-namespace Marmotte\Teng;
+namespace Marmotte\Teng\Exceptions;
 
-use Marmotte\Brick\Bricks\BrickLoader;
-use Marmotte\Brick\Bricks\BrickManager;
-use Marmotte\Brick\Cache\CacheManager;
-use Marmotte\Brick\Mode;
-use PHPUnit\Framework\TestCase;
+use Exception;
 
-class LoadBrickTest extends TestCase
+final class FunctionExistsException extends Exception
 {
-    public function testBrickCanBeLoaded(): void
+    public function __construct(string $name)
     {
-        $brick_manager = new BrickManager();
-        $brick_loader  = new BrickLoader(
-            $brick_manager,
-            new CacheManager(mode: Mode::TEST)
-        );
-        $brick_loader->loadFromDir(__DIR__ . '/../src', 'marmotte/teng');
-        $brick_loader->loadBricks();
-        $service_manager = $brick_manager->initialize(__DIR__ . '/../src', __DIR__ . '/../src');
-
-        self::assertNotNull($brick_manager->getBrick('marmotte/teng'));
-        self::assertNotNull($brick_manager->getBrick('marmotte/http'));
-
-        self::assertTrue($service_manager->hasService(Engine::class));
+        parent::__construct(sprintf('Function %s already defined', $name));
     }
 }

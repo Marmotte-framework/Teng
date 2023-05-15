@@ -1,0 +1,4 @@
+<ul>
+    {( values: key -> value }}<li><strong>{{ key }}</strong> {{ value }}</li>
+    {{ values )}
+</ul>
