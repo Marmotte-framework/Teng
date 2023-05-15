@@ -27,13 +27,19 @@ declare(strict_types=1);
 
 namespace Marmotte\Teng\Parsers;
 
+use Parsedown;
+
 final class MarkdownParser extends AbstractParser
 {
     public function parse(string $content, array $values): string
     {
-        $content = $this->parseScript($content, $values);
+        $result = $this->parseScript($content, $values);
 
-        $this->writer->write($content);
+        $parsedown = new Parsedown();
+        /** @var string $result */
+        $result = $parsedown->text($result);
+
+        $this->writer->write($result);
 
         return $this->writer->getStream()->getContents();
     }
