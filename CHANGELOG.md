@@ -2,5 +2,7 @@
 
 ## v1.0.0
 
+*2023-05-15*
+
 - Add Engine Service
-- Add Parser
+- Add Parser for HTML and Markdown
