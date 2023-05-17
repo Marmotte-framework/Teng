@@ -42,7 +42,7 @@ class EngineTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $brick_manager = new BrickManager();
-        $brick_loader = new BrickLoader(
+        $brick_loader  = new BrickLoader(
             $brick_manager,
             new CacheManager(mode: Mode::TEST)
         );
@@ -82,6 +82,17 @@ class EngineTest extends TestCase
         self::assertSame(file_get_contents($expect), $result->getContents());
     }
 
+    public function testCanRenderAbsolutePath(): void
+    {
+        try {
+            $result = self::$engine->render(__DIR__ . '/Fixtures/tests/empty.html.teng');
+        } catch (\Throwable $e) {
+            self::fail($e->getMessage());
+        }
+
+        self::assertEmpty($result->getContents());
+    }
+
     public static function dataTestRender(): iterable
     {
         foreach (array_filter(
@@ -92,8 +103,8 @@ class EngineTest extends TestCase
 
             yield $test => [
                 'filename' => 'tests/' . $test,
-                'expect' => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
-                'values' => file_exists($values) ? psl_json_decode(file_get_contents($values)) : [],
+                'expect'   => __DIR__ . '/Fixtures/expects/' . $test . '.expect',
+                'values'   => file_exists($values) ? psl_json_decode(file_get_contents($values)) : [],
             ];
         }
     }

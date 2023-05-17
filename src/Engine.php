@@ -64,7 +64,11 @@ final class Engine
      */
     public function render(string $template, array $values = []): StreamInterface
     {
-        $filename = $this->config->getTemplateDir() . '/' . $template;
+        if (str_starts_with($template, '/')) {
+            $filename = $template;
+        } else {
+            $filename = $this->config->getTemplateDir() . '/' . $template;
+        }
         if (!file_exists($filename)) {
             throw new TemplateNotFoundException($filename);
         }
