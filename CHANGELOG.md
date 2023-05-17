@@ -4,6 +4,7 @@
 
 - Engine handle absolute path
 - Implicitly require `ext-mbstring` in `composer.json`
+- Base templates
 
 ## v1.0.0
 

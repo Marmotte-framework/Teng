@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Marmotte\Teng\Parsers;
 
+use Marmotte\Teng\Exceptions\TemplateNotFoundException;
 use Marmotte\Teng\IndentWriter;
 use Marmotte\Teng\Parsers\Rules\AbstractRule;
 use Marmotte\Teng\Parsers\Rules\LoopRule;
@@ -41,6 +42,7 @@ abstract class AbstractParser
     public function __construct(
         protected readonly IndentWriter $writer,
         private readonly array          $functions,
+        private readonly string         $template_dir,
     ) {
     }
 
@@ -49,6 +51,12 @@ abstract class AbstractParser
      */
     public abstract function parse(string $content, array $values): string;
 
+    private const PATTERN_RULE_BASE           = /** @lang PhpRegExp */
+        '/^(\{@ *([^ ]+?) *}}).*/';
+    private const PATTERN_RULE_BLOCK          = /** @lang PhpRegExp */
+        '/^(\{% *([^ ]+?) *}}).*/';
+    private const PATTERN_RULE_BLOCK_END      = /** @lang PhpRegExp */
+        '/^(\{\{ *([^ ]+?) *%}).*/';
     private const PATTERN_RULE_VARIABLE       = /** @lang PhpRegExp */
         '/^(\{\{ *(([^ ]+?)( *\| *[^ ]+?)*) *}}).*/';
     private const PATTERN_RULE_PCONDITION     = /** @lang PhpRegExp */
@@ -71,9 +79,15 @@ abstract class AbstractParser
 
     /**
      * @param array<string, mixed> $values
+     * @throws TemplateNotFoundException
      */
     protected function parseScript(string $content, array $values): string
     {
+        $matches = [];
+        if (preg_match(self::PATTERN_RULE_BASE, $content, $matches) === 1) {
+            $content = $this->parseBase($matches[2], substr($content, mb_strlen($matches[1])));
+        }
+
         $result = '';
 
         /** @var AbstractRule[] $rules */
@@ -193,6 +207,107 @@ abstract class AbstractParser
         }
 
         return $result;
+    }
+
+    /**
+     * @throws TemplateNotFoundException
+     */
+    private function parseBase(string $base_template, string $content): string
+    {
+        if (str_starts_with($base_template, '/')) {
+            $filename = $base_template;
+        } else {
+            $filename = $this->template_dir . '/' . $base_template;
+        }
+        if (!file_exists($filename)) {
+            throw new TemplateNotFoundException($filename);
+        }
+        $base_content = file_get_contents($filename);
+
+        $results        = [''];
+        $current_result = 0;
+        /** @var array<string, int> $blocks */
+        $blocks        = [];
+        $current_block = null;
+
+        // Parse base template and collect blocks
+        $i        = 0;
+        $in_block = false;
+        while ($i < mb_strlen($base_content)) {
+            if ($base_content[$i] === '{') {
+                $matches = [];
+                $str     = substr($base_content, $i);
+                switch (1) {
+                    case preg_match(self::PATTERN_RULE_BLOCK, $str, $matches):
+                        $name = $matches[2];
+                        if (!$in_block) {
+                            $in_block = true;
+                            $current_result++;
+                            $blocks[$name]            = $current_result;
+                            $current_block            = $name;
+                            $results[$current_result] = '';
+                        }
+                        $i += mb_strlen($matches[1]);
+                        break;
+                    case preg_match(self::PATTERN_RULE_BLOCK_END, $str, $matches):
+                        $name = $matches[2];
+                        if ($in_block && $current_block === $name) {
+                            $in_block = false;
+                            $current_result++;
+                            $results[$current_result] = '';
+                            $current_block            = null;
+                        }
+                        $i += mb_strlen($matches[1]);
+                        break;
+                    default:
+                        $results[$current_result] .= $base_content[$i];
+                        $i++;
+                        break;
+                }
+            } else {
+                $results[$current_result] .= $base_content[$i];
+                $i++;
+            }
+        }
+
+        // Parse content and override blocks
+        $i        = 0;
+        $in_block = false;
+        while ($i < mb_strlen($content)) {
+            if ($content[$i] === '{') {
+                $matches = [];
+                $str     = substr($content, $i);
+                switch (1) {
+                    case preg_match(self::PATTERN_RULE_BLOCK, $str, $matches):
+                        $name = $matches[2];
+                        if (!$in_block && isset($blocks[$name])) {
+                            $in_block                         = true;
+                            $current_block                    = $name;
+                            $results[$blocks[$current_block]] = '';
+                        }
+                        $i += mb_strlen($matches[1]);
+                        break;
+                    case preg_match(self::PATTERN_RULE_BLOCK_END, $str, $matches):
+                        $name = $matches[2];
+                        if ($in_block && $current_block === $name) {
+                            $in_block      = false;
+                            $current_block = null;
+                        }
+                        $i += mb_strlen($matches[1]);
+                        break;
+                    default:
+                        $i++;
+                        break;
+                }
+            } else if ($in_block) {
+                $results[$blocks[$current_block]] .= $content[$i];
+                $i++;
+            } else {
+                $i++;
+            }
+        }
+
+        return implode('', $results);
     }
 
     /**

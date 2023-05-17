@@ -83,8 +83,8 @@ final class Engine
         $content       = file_get_contents($filename);
         $writer        = new IndentWriter($this->stream_factory->createStream(''));
         $render_result = match ($this->getFileType($filename)) {
-            'html' => (new HTMLParser($writer, $this->functions))->parse($content, $values),
-            'md'   => (new MarkdownParser($writer, $this->functions))->parse($content, $values),
+            'html' => (new HTMLParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $values),
+            'md'   => (new MarkdownParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $values),
             null   => throw new NotHandledFileTypeException($filename)
         };
 
