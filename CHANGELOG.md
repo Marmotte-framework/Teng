@@ -3,6 +3,7 @@
 ## v1.1.0
 
 - Engine handle absolute path
+- Implicitly require `ext-mbstring` in `composer.json`
 
 ## v1.0.0
 
