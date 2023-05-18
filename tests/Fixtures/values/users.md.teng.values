@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "name": "John Doe",
+      "image": "image1"
+    },
+    {
+      "name": "Bob",
+      "image": "image2"
+    },
+    {
+      "name": "Alice",
+      "image": "image3"
+    },
+    {
+      "name": "Eve",
+      "image": "image4"
+    },
+    {
+      "name": "Fred",
+      "image": "image5"
+    }
+  ]
+}

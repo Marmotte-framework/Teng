@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% title }}My Website{{ title %}</title>
+    {% style }}{{ style %}
+</head>
+<body>
+{% body }}
+<p>An empty body</p>
+{{ body %}
+</body>
+</html>

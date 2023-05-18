@@ -36,7 +36,7 @@ Conditions are essential to choose if a portion of template is shown or not. The
 
 **Positive:**
 
-```mdt
+```teng
 {# key }}
     ...
 {{ key #}
@@ -46,7 +46,7 @@ Tests if variable is set and its value is true or not null.
 
 **Negative:**
 
-```mdt
+```teng
 {! key }}
     ...
 {{ key !}
@@ -61,7 +61,7 @@ The notation for `key` is the same as for [variables](#variables)
 
 When the value of your variable is an array, it can be useful to iterate on it. For that you can use this syntax:
 
-```mdt
+```teng
 {( array: key -> value }}
     ...
 {{ array )}
@@ -70,7 +70,7 @@ When the value of your variable is an array, it can be useful to iterate on it. 
 You iterate on array `array`, keys are `key` and values are `value`. If you don't need the key, you can iterate only on
 values by using this syntax:
 
-```mdt
+```teng
 {( array: value }}
     ...
 {{ array )}
@@ -83,19 +83,19 @@ them on variables as filters.
 
 If you want to call them directly, use this syntax:
 
-```mdt
+```teng
 {| function }}
 ```
 
 Or this one to pass some arguments:
 
-```mdt
+```teng
 {| function(...) }}
 ```
 
 In other hand, if you want to apply the function as a filter on a variable, use this syntax:
 
-```mdt
+```teng
 {{ key | function }}
 ```
 
@@ -113,3 +113,72 @@ $engine->addFunction('nameOfFunction', static fn() => 'Hello World!');
 $my_class = new MyClass();
 $engine->addFunction('nameOfFunction', [$my_class, 'myMethod']);
 ```
+
+### Includes
+
+Sometimes you may need to decompose your template in several files, well named includes are here for that. With below
+syntax you can include another template in the current one. When you are doing so, the included template share the same
+values as the original one. So no need to pass some values explicitly (it's very useful inside loops).
+
+```teng
+{> mySecondTemplate }}
+```
+
+For example in a loop of user:
+
+```teng
+<!-- list_users.html.teng -->
+<ul>
+    {( users: user }}
+    <li>{> show_user.html.teng }}</li>
+    {{ users )}
+</ul>
+
+<!-- show_user.html.teng -->
+<img src="{{ user.image }}"> {{ user.name }}
+```
+
+### Base template
+
+Another feature which is very useful: base template. If you need to use the same base for your templates several times,
+it can be painful to copy/paste the base each time (and don't talk about the refactoring). For this case you can use
+base template. At the beginning of your template you specify another template which be used as a 'template of template'.
+Let take an example.
+
+First, let define a base template:
+
+```teng
+<!-- base.html.teng -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% title }}My Website{{ title %}</title>
+    {% style }}{{ style %}
+</head>
+<body>
+{% body }}
+<p>An empty body</p>
+{{ body %}
+</body>
+</html>
+```
+
+In this file we use this syntax: `{% block }}{{ block %}` to define content blocks. They can have a default value as for
+title and body or not as for style. Then in your second template you just override these blocks to choose what is their
+content:
+
+```teng
+<!-- template.md.teng -->
+{@ base.html.teng }}
+
+{% title }}My template{{ title %}
+
+{% body }}
+# My template
+
+Lorem ipsum...
+{{ body %}
+```
+
+To specify your base template, you use `{@ baseTemplate }}` syntax, then you have just to override the blocks you want.
+Please note that content outside the blocks will not be displayed.

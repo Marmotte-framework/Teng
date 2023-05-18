@@ -47,12 +47,20 @@ final class Engine
      * @var array<string, callable|array{object, string}>
      */
     private array $functions = [];
+    /**
+     * @var array<string, mixed>
+     */
+    private array $init_values = [];
 
     public function __construct(
         private readonly EngineConfig  $config,
         private readonly CacheManager  $cache_manager,
         private readonly StreamFactory $stream_factory,
     ) {
+        $this->addFunction(
+            'asset',
+            fn(string $asset) => $this->config->getAssetDir() . '/' . $asset
+        );
     }
 
     /**
@@ -64,7 +72,11 @@ final class Engine
      */
     public function render(string $template, array $values = []): StreamInterface
     {
-        $filename = $this->config->getTemplateDir() . '/' . $template;
+        if (str_starts_with($template, '/')) {
+            $filename = $template;
+        } else {
+            $filename = $this->config->getTemplateDir() . '/' . $template;
+        }
         if (!file_exists($filename)) {
             throw new TemplateNotFoundException($filename);
         }
@@ -78,9 +90,10 @@ final class Engine
 
         $content       = file_get_contents($filename);
         $writer        = new IndentWriter($this->stream_factory->createStream(''));
+        $used_values   = array_merge($this->init_values, $values);
         $render_result = match ($this->getFileType($filename)) {
-            'html' => (new HTMLParser($writer, $this->functions))->parse($content, $values),
-            'md'   => (new MarkdownParser($writer, $this->functions))->parse($content, $values),
+            'html' => (new HTMLParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $used_values),
+            'md'   => (new MarkdownParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $used_values),
             null   => throw new NotHandledFileTypeException($filename)
         };
 
@@ -99,6 +112,11 @@ final class Engine
         }
 
         $this->functions[$name] = $function;
+    }
+
+    public function addValue(string $name, mixed $value): void
+    {
+        $this->init_values[$name] = $value;
     }
 
     // _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.

@@ -1,0 +1,11 @@
+{@ tests/base.html.teng }}
+
+{% title }}My template{{ title %}
+
+Skipped content
+
+{% body }}
+# My template
+
+Lorem ipsum...
+{{ body %}

@@ -44,7 +44,7 @@ $brick_loader  = new BrickLoader(
 try {
     $brick_loader->loadFromDir(__DIR__ . '/../../src', 'marmotte/teng');
     $brick_loader->loadBricks();
-    $service_manager = $brick_manager->initialize(__DIR__ . '/tests', __DIR__);
+    $service_manager = $brick_manager->initialize(__DIR__, __DIR__);
 } catch (\Throwable $e) {
     echo "\033[31m" . $e->getMessage() . "\033[0m\n";
     exit($e->getCode());
@@ -76,7 +76,7 @@ foreach ($tests as $test) {
         try {
             /** @var array<string, mixed> */
             $values = file_exists($values) ? psl_json_decode(file_get_contents($values)) : [];
-            $result = $engine->render($test, $values);
+            $result = $engine->render('tests/' . $test, $values);
             file_put_contents($expect, (string) $result);
             $generated[] = $expect;
         } catch (Throwable) {

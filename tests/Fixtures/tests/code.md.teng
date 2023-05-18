@@ -1,0 +1,5 @@
+# A simple code
+
+```kotlin
+fun factorial(num: Int) = (1..num).reduce(Int::times)
+```
