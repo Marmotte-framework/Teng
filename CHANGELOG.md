@@ -8,6 +8,7 @@
 - Change `erusev/parsedown` for `league/commonmark`
 - Includes
 - Engine can have values common to each template
+- Add function `asset` to access easily to public assets
 
 ## v1.0.0
 
