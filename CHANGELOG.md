@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.1
+
+*2023-05-18*
+
+- Explicitly require version 1.1.4 for `marmotte/http`
+
 ## v1.1.0
 
 *2023-05-18*
