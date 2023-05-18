@@ -7,6 +7,7 @@
 - Base templates
 - Change `erusev/parsedown` for `league/commonmark`
 - Includes
+- Engine can have values common to each template
 
 ## v1.0.0
 

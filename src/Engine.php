@@ -47,6 +47,10 @@ final class Engine
      * @var array<string, callable|array{object, string}>
      */
     private array $functions = [];
+    /**
+     * @var array<string, mixed>
+     */
+    private array $init_values = [];
 
     public function __construct(
         private readonly EngineConfig  $config,
@@ -82,9 +86,10 @@ final class Engine
 
         $content       = file_get_contents($filename);
         $writer        = new IndentWriter($this->stream_factory->createStream(''));
+        $used_values   = array_merge($this->init_values, $values);
         $render_result = match ($this->getFileType($filename)) {
-            'html' => (new HTMLParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $values),
-            'md'   => (new MarkdownParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $values),
+            'html' => (new HTMLParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $used_values),
+            'md'   => (new MarkdownParser($writer, $this->functions, $this->config->getTemplateDir()))->parse($content, $used_values),
             null   => throw new NotHandledFileTypeException($filename)
         };
 
@@ -103,6 +108,11 @@ final class Engine
         }
 
         $this->functions[$name] = $function;
+    }
+
+    public function addValue(string $name, mixed $value): void
+    {
+        $this->init_values[$name] = $value;
     }
 
     // _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
