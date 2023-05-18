@@ -265,6 +265,7 @@ abstract class AbstractParser
                         break;
                 }
             } else {
+                /** @psalm-suppress PossiblyNullOperand */
                 $results[$current_result] .= $base_content[$i];
                 $i++;
             }
@@ -300,6 +301,7 @@ abstract class AbstractParser
                         break;
                 }
             } else if ($in_block) {
+                /** @psalm-suppress PossiblyNullArrayOffset */
                 $results[$blocks[$current_block]] .= $content[$i];
                 $i++;
             } else {
