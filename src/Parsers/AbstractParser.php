@@ -73,9 +73,6 @@ abstract class AbstractParser
         '/^(\{\{ *([^ ]+?) *\)}).*/';
     private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
         '/(^\{\| *([a-zA-Z0-9_]*?) *(\((.*?)\))? *}}).*/';
-    private const TYPE_RULE_PCONDITION        = 'type-pcondition';
-    private const TYPE_RULE_NCONDITION        = 'type-ncondition';
-    private const TYPE_RULE_LOOP              = 'type-loop';
 
     /**
      * @param array<string, mixed> $values
