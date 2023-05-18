@@ -5,6 +5,7 @@
 - Engine handle absolute path
 - Implicitly require `ext-mbstring` in `composer.json`
 - Base templates
+- Change `erusev/parsedown` for `league/commonmark`
 
 ## v1.0.0
 

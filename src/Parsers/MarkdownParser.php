@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Marmotte\Teng\Parsers;
 
-use Parsedown;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 
 final class MarkdownParser extends AbstractParser
 {
@@ -35,9 +35,17 @@ final class MarkdownParser extends AbstractParser
     {
         $result = $this->parseScript($content, $values);
 
-        $parsedown = new Parsedown();
-        /** @var string $result */
-        $result = $parsedown->text($result);
+        $converter = new GithubFlavoredMarkdownConverter([
+            'disallowed_raw_html' => ['disallowed_tags' => []],
+            'table'               => [
+                'alignment_attributes' => [
+                    'left'   => ['style' => 'text-align: left;'],
+                    'center' => ['style' => 'text-align: center;'],
+                    'right'  => ['style' => 'text-align: right;'],
+                ],
+            ],
+        ]);
+        $result    = (string) $converter->convert($result);
 
         $this->writer->write($result);
 
