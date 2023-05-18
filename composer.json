@@ -25,7 +25,7 @@
         "php": ">=8.1",
         "ext-mbstring": "*",
         "marmotte/brick": "^1.2",
-        "marmotte/http": "^1.1",
+        "marmotte/http": "^1.1.4",
         "league/commonmark": "^2.4"
     },
     "require-dev": {
