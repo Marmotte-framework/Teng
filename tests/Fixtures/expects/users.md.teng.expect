@@ -1,0 +1,18 @@
+<h1>List of users</h1>
+<ul>
+<li>
+<p><img src="image1" alt="User image" /> John Doe</p>
+</li>
+<li>
+<p><img src="image2" alt="User image" /> Bob</p>
+</li>
+<li>
+<p><img src="image3" alt="User image" /> Alice</p>
+</li>
+<li>
+<p><img src="image4" alt="User image" /> Eve</p>
+</li>
+<li>
+<p><img src="image5" alt="User image" /> Fred</p>
+</li>
+</ul>

@@ -6,6 +6,7 @@
 - Implicitly require `ext-mbstring` in `composer.json`
 - Base templates
 - Change `erusev/parsedown` for `league/commonmark`
+- Includes
 
 ## v1.0.0
 

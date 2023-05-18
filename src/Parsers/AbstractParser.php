@@ -72,7 +72,9 @@ abstract class AbstractParser
     private const PATTERN_RULE_LOOP_END       = /** @lang PhpRegExp */
         '/^(\{\{ *([^ ]+?) *\)}).*/';
     private const PATTERN_RULE_FUNCTION       = /** @lang PhpRegExp */
-        '/(^\{\| *([a-zA-Z0-9_]*?) *(\((.*?)\))? *}}).*/';
+        '/^(\{\| *([a-zA-Z0-9_]*?) *(\((.*?)\))? *}}).*/';
+    private const PATTERN_RULE_INCLUDE        = /** @lang PhpRegExp */
+        '/^(\{> *([^ ]+?) *}}).*/';
 
     /**
      * @param array<string, mixed> $values
@@ -188,6 +190,13 @@ abstract class AbstractParser
                         $args = $this->trimExplodeTrim($matches[4] ?? '', ',');
                         if (!$skip)
                             $result .= $this->parseFunction($name, $args, $values);
+                        $i += mb_strlen($matches[1]);
+                        break;
+                    case preg_match(self::PATTERN_RULE_INCLUDE, $str, $matches):
+                        $name = $matches[2];
+                        if (!$skip) {
+                            $result .= $this->parseInclude($name, $values);
+                        }
                         $i += mb_strlen($matches[1]);
                         break;
                     default:
@@ -419,7 +428,7 @@ abstract class AbstractParser
      * @param array<string, mixed> $values
      * @return array<string, mixed>|false
      */
-    public function iterateLoop(LoopRule $rule, array $values): array|false
+    private function iterateLoop(LoopRule $rule, array $values): array|false
     {
         $res = $rule->getNext();
 
@@ -428,6 +437,25 @@ abstract class AbstractParser
         }
 
         return array_merge($values, $res);
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     * @throws TemplateNotFoundException
+     */
+    private function parseInclude(string $name, array $values): string
+    {
+        if (str_starts_with($name, '/')) {
+            $filename = $name;
+        } else {
+            $filename = $this->template_dir . '/' . $name;
+        }
+        if (!file_exists($filename)) {
+            throw new TemplateNotFoundException($filename);
+        }
+        $content = file_get_contents($filename);
+
+        return $this->parseScript($content, $values);
     }
 
     /**
