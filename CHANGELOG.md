@@ -2,6 +2,8 @@
 
 ## v1.1.0
 
+*2023-05-18*
+
 - Engine handle absolute path
 - Implicitly require `ext-mbstring` in `composer.json`
 - Base templates
