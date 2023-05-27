@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.2
+
+*2023-05-27*
+
+- Rename config file to `teng.yml`
+
 ## v1.1.1
 
 *2023-05-18*
