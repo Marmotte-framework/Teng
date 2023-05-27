@@ -33,7 +33,6 @@ final class EngineConfig extends ServiceConfig
 {
     public function __construct(
         private readonly string $template_dir,
-        private readonly string $asset_dir,
     ) {
     }
 
@@ -43,14 +42,6 @@ final class EngineConfig extends ServiceConfig
     public function getTemplateDir(): string
     {
         return $this->project_root . '/' . $this->template_dir;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAssetDir(): string
-    {
-        return $this->asset_dir;
     }
 
     public static function fromArray(array $array): ServiceConfig
@@ -63,29 +54,20 @@ final class EngineConfig extends ServiceConfig
             $template_dir = $defaults['template_dir'];
         }
 
-        if (array_key_exists('asset_dir', $array) && is_string($array['asset_dir'])) {
-            $asset_dir = $array['asset_dir'];
-        } else {
-            $asset_dir = $defaults['asset_dir'];
-        }
-
         return new self(
-            $template_dir,
-            $asset_dir
+            $template_dir
         );
     }
 
     /**
      * @return array{
-     *     template_dir: string,
-     *     asset_dir: string
+     *     template_dir: string
      * }
      */
     public static function defaultArray(): array
     {
         return [
             'template_dir' => '',
-            'asset_dir'    => '',
         ];
     }
 }

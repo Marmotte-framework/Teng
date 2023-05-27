@@ -57,10 +57,6 @@ final class Engine
         private readonly CacheManager  $cache_manager,
         private readonly StreamFactory $stream_factory,
     ) {
-        $this->addFunction(
-            'asset',
-            fn(string $asset) => $this->config->getAssetDir() . '/' . $asset
-        );
     }
 
     /**

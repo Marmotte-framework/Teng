@@ -2,7 +2,7 @@
 
 ## v1.1.3
 
-- Fix asset dir
+- Remove asset function (move it to Core)
 
 ## v1.1.2
 
