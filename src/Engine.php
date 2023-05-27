@@ -38,10 +38,10 @@ use Marmotte\Teng\Parsers\HTMLParser;
 use Marmotte\Teng\Parsers\MarkdownParser;
 use Psr\Http\Message\StreamInterface;
 
-#[Service('mdgen.yml')]
+#[Service('teng.yml')]
 final class Engine
 {
-    private const CACHE_DIR = 'mdgen-templates';
+    private const CACHE_DIR = 'teng-templates';
 
     /**
      * @var array<string, callable|array{object, string}>
