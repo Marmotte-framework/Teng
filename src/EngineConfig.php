@@ -50,7 +50,7 @@ final class EngineConfig extends ServiceConfig
      */
     public function getAssetDir(): string
     {
-        return $this->project_root . '/' . $this->asset_dir;
+        return $this->asset_dir;
     }
 
     public static function fromArray(array $array): ServiceConfig

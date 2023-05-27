@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.3
+
+- Fix asset dir
+
 ## v1.1.2
 
 *2023-05-27*
