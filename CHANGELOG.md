@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.3
+
+*2023-05-28*
+
+- Remove asset function (move it to Core)
+
 ## v1.1.2
 
 *2023-05-27*
