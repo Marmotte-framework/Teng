@@ -303,6 +303,10 @@ abstract class AbstractParser
                         $i += mb_strlen($matches[1]);
                         break;
                     default:
+                        if ($in_block) {
+                            /** @psalm-suppress PossiblyNullArrayOffset */
+                            $results[$blocks[$current_block]] .= $content[$i];
+                        }
                         $i++;
                         break;
                 }
