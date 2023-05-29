@@ -1,0 +1,5 @@
+{@ tests/base.html.teng }}
+
+{% body }}
+Some {| strong(strong) }} text
+{{ body %}

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.4
+
+*2023-05-29*
+
+- Fix bug with script inside base blocks
+
 ## v1.1.3
 
 *2023-05-28*
